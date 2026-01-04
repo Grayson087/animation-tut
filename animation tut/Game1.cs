@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Vector2 = Microsoft.Xna.Framework.Vector2;
 
 namespace animation_tut
 {
@@ -10,11 +12,14 @@ namespace animation_tut
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
-        Texture2D greytexture, milkytexture, browntexture, orangetexture, introTexture;
+        Texture2D greytexture, milkytexture, browntexture, orangetexture, introTexture, endingTexture;
         Rectangle greyrect, milkyrect, brownrect, orangerect;
         Vector2 greyspeed, milkyspeed, brownspeed, orangespeed;
-        int milk, hori, vert ;
+        SpriteFont introfont, countfont;
+        int milk, hori, vert, Bounce;
+       
         MouseState mousestate;
+        
         
         Random generator = new Random();
         int back;
@@ -22,7 +27,8 @@ namespace animation_tut
         enum Screen
         {
             intro,
-            Tribbleyard
+            Tribbleyard,
+            end,
             
         }
         Screen screen;
@@ -58,7 +64,7 @@ namespace animation_tut
             back = generator.Next(10);
             hori = 100;
             vert = 100;
-            
+            Bounce = 0;
         }
 
         protected override void LoadContent()
@@ -71,6 +77,9 @@ namespace animation_tut
             browntexture = Content.Load<Texture2D>("brown");
             orangetexture = Content.Load<Texture2D>("orange");
             introTexture = Content.Load<Texture2D>("intro");
+            introfont = Content.Load<SpriteFont>("introfont");
+            countfont = Content.Load<SpriteFont>("countfont");
+            endingTexture = Content.Load<Texture2D>("ending");
         }
 
         protected override void Update(GameTime gameTime)
@@ -85,6 +94,7 @@ namespace animation_tut
             }
             else if (screen == Screen.Tribbleyard)
             {
+                
                 greyrect.X += (int)greyspeed.X;
                 greyrect.Y += (int)greyspeed.Y;
                 milkyrect.X += (int)milkyspeed.X;
@@ -95,36 +105,53 @@ namespace animation_tut
                 orangerect.Y += (int)orangespeed.Y;
                 if (greyrect.Right > 800 || greyrect.Left < 0)
                     greyspeed.X *= -1;
+                if (greyrect.Right > 800 || greyrect.Left < 0)
+                    Bounce = Bounce + 1;
                 if (greyrect.Bottom > _graphics.PreferredBackBufferHeight || greyrect.Top < 0)
                     greyspeed.Y *= -1;
+                if (greyrect.Bottom > _graphics.PreferredBackBufferHeight || greyrect.Top < 0)
+                    Bounce = Bounce + 1;
                 if (milkyrect.Right > 800 || milkyrect.Left < 0)
                     milkyspeed.X *= -1;
+                if (milkyrect.Right > 800 || milkyrect.Left < 0)
+                    Bounce = Bounce + 1;
                 if (brownrect.Bottom > 700)
                     brownrect = new Rectangle(100, -100, 100, 100);
+                if (brownrect.Bottom > 700)
+                    Bounce = Bounce + 1;
                 if (orangerect.Right > 800 || orangerect.Left < 0)
                     orangespeed.X *= -1;
                 if (orangerect.Bottom > _graphics.PreferredBackBufferHeight || orangerect.Top < 0)
                     orangespeed.Y *= -1;
+                if (orangerect.Right > 800 || orangerect.Left < 0)
+                    Bounce = Bounce + 1;
+                if (orangerect.Bottom > _graphics.PreferredBackBufferHeight || orangerect.Top < 0)
+                    Bounce = Bounce +1;
+
+                else if (Bounce == 20)
+                {
+                    screen = Screen.end;
+
+                }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    base.Update(gameTime);
             }
-
-               
-            
-            
-                
-
-
-
-
-
-
-
-
-
-
-
-
-
-            base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
@@ -137,10 +164,15 @@ namespace animation_tut
             _spriteBatch.Begin();
             if(screen == Screen.intro)
             {
-                _spriteBatch.Draw(introTexture, new Rectangle (0,0, 800,500), Color.White);
+                _spriteBatch.Draw(introTexture, new Rectangle (0,0, 800,600), Color.White);
+                _spriteBatch.DrawString(introfont, "Press Left Click to Watch the Tribbles", new System.Numerics.Vector2(50, 300), Color.White);
+
             }
             else if (screen == Screen.Tribbleyard)
+
             {
+                _spriteBatch.DrawString(countfont, Bounce.ToString(), new System.Numerics.Vector2(50, 100), Color.White);
+               
                 GraphicsDevice.Clear(Color.CornflowerBlue);
                 if (milkyrect.Right > 800 || milkyrect.Left < 0)
                     GraphicsDevice.Clear(Color.Green);
@@ -160,9 +192,17 @@ namespace animation_tut
                 _spriteBatch.Draw(orangetexture, orangerect, Color.White);
 
             }
+            else if (screen == Screen.end)
+            {
+                _spriteBatch.Draw(endingTexture, new Rectangle(0, 0, 800, 600), Color.White);
+                _spriteBatch.DrawString(introfont, "the end", new System.Numerics.Vector2(50, 300), Color.White);
+
+            }
+           
 
 
             _spriteBatch.End();
+           
 
 
 
